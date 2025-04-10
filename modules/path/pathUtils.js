@@ -1,5 +1,7 @@
 // pathUtils.js - Helper functions for path management and movement calculations
 
+import { getInitialTool } from "../core/globalVaribles";
+
 /**
  * Determines the keys that cause the most dramatic movement in positive and negative X and Z directions.
  * @param {number} yaw - The player's current yaw angle in degrees.
@@ -113,7 +115,7 @@ export function getMovementDirections(delta) {
 
     if (normZ > 0) movementDirections.push(directions.z.positive);
     else if (normZ < 0) movementDirections.push(directions.z.negative);
-
+    
     return movementDirections;
 }
 

@@ -1,7 +1,7 @@
 // pathManager.js - Core path-following logic
-import { setBotState, getCurrentIndex, getCurrentPath, getCurrentPathType, getIsFollowingPath, getRunEvacuationPath, getTargetPoint, setCurrentIndex, setCurrentPath, setCurrentPathType, setIsFollowingPath, setRunEvacuationPath, setTargetPoint, getBotState, getCurrentArea, setCurrentArea, setGuiVisible, setPestCount, getTestingMode, updatePestRepellent } from "../core/globalVaribles";
+import { setBotState, getCurrentIndex, getCurrentPath, getCurrentPathType, getIsFollowingPath, getRunEvacuationPath, getTargetPoint, setCurrentIndex, setCurrentPath, setCurrentPathType, setIsFollowingPath, setRunEvacuationPath, setTargetPoint, getBotState, getCurrentArea, setCurrentArea, setGuiVisible, setPestCount, getTestingMode, updatePestRepellent, getInitialTool } from "../core/globalVaribles";
 import { calculateMovementDelta, getMovementDirections, hasReachedTarget } from "../path/pathUtils";
-import { pressKey, releaseKey, releaseAllKeys, tapKey } from "../core/keyManager";
+import { pressKey, releaseKey, releaseAllKeys, tapKey, forceRealseAllKeys } from "../core/keyManager";
 import { logInfo, logWarn, logDebug } from "../core/logger";
 import { getPlayerPosition } from "../player/playerManager";
 import { getPathPoints } from "./pathConfig";
@@ -147,7 +147,7 @@ function moveTowardsPoint(playerPos, targetPoint) {
     directions.forEach((direction) => {
         if (currentDirection.includes(direction) && !newDirections.includes(direction)) {
             if (evacuating) {
-                releaseKey(`key.${direction}`);
+            releaseKey(`key.${direction}`);
             } else {
                 setTimeout(() => {releaseKey(`key.${direction}`);}, 50 + Math.random() * 100);
             }
@@ -166,9 +166,11 @@ function moveTowardsPoint(playerPos, targetPoint) {
  * Restarts the bot to the start of the farm
  */
 function restartPosistion() {
+    forceRealseAllKeys();
+    currentDirection = [];
     if (getTestingMode()) {
         ChatLib.command("tp @p -213 4 337 180 0");
-    } else {
+    } else {        
         ChatLib.command("warp garden");
     }
 }

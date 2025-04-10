@@ -392,3 +392,22 @@ export function getCheckFailed() {
 export function setCheckFailed(value) {
     checkFailed = value;
 }
+
+
+let initialTool = null;
+
+/**
+ * Gets the initial tool.
+ * @return {string} - The initial tool.
+ */
+export function getInitialTool() {
+    return initialTool;
+}
+
+/**
+ * Sets the initial tool.
+ * @param {string} tool - The new initial tool.
+ */
+export function setInitialTool(tool) {
+    initialTool = tool;
+}

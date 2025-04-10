@@ -1,7 +1,7 @@
 {
-    "name": "MinecraftBot",
-    "version": "1.0.0",
+    "name": "FarmBot",
+    "version": "1.1.0",
     "description": "A ChatTriggers module for automating Minecraft actions.",
-    "author": "NoName",
+    "author": "noName",
     "entry": "modules/core/main.js"
 }

@@ -1,5 +1,13 @@
 // Import Network Functions
+import { logDebug } from "../core/logger.js";
 import { savePaths, loadPaths } from "../path/pathConfig.js";
+
+const JFileChooser = Java.type("javax.swing.JFileChooser");
+const FileReader   = Java.type("java.io.FileReader");
+const BufferedReader = Java.type("java.io.BufferedReader");
+const FileWriter   = Java.type("java.io.FileWriter");
+const BufferedWriter = Java.type("java.io.BufferedWriter");
+let Thread         = Java.type("java.lang.Thread");
 
 // =================== PATH GUI ===================
 export function openPathGui() {
@@ -35,7 +43,7 @@ export function openPathGui() {
         } else if (isButtonClicked(mouseX, mouseY, guiX + 230, guiY + 10, 100, 30)) {
             activeTab = "Evacuation";
             scrollOffset = 0;
-        }
+        } 
 
         // Check Add Point Button Click
         if (isButtonClicked(mouseX, mouseY, guiX + 10, guiY + 50, 100, 30)) {
@@ -56,12 +64,6 @@ export function openPathGui() {
         if (isButtonClicked(mouseX, mouseY, guiX + 160, guiY + 50, 30, 30)) {
             const maxScroll = Math.max(0, pathConfig[activeTab].length - maxVisiblePoints);
             if (scrollOffset < maxScroll) scrollOffset++;
-        }
-
-        // Check Save Button Click
-        if (isButtonClicked(mouseX, mouseY, guiX + 470, guiY + 10, 70, 30)) {
-            savePaths(pathConfig);
-            gui.close();
         }
 
         // Check Move Up, Move Down, and Delete Button Clicks
@@ -95,6 +97,58 @@ export function openPathGui() {
                 scrollOffset = Math.min(scrollOffset, maxScroll);
             }
         });
+
+        // Check Export Button Click
+        if (isButtonClicked(mouseX, mouseY, guiX + 420, guiY + 10, 70, 30)) {
+            new Thread(function() {
+                var fileChooser = new JFileChooser();
+                var result = fileChooser.showSaveDialog(null);
+                if (result === JFileChooser.APPROVE_OPTION) {
+                    try {
+                        var file = fileChooser.getSelectedFile();
+                        var bw = new BufferedWriter(new FileWriter(file));
+                        bw.write(JSON.stringify(pathConfig, null, 2));
+                        bw.close();
+                        ChatLib.chat("File saved to " + file.getAbsolutePath());
+                    } catch (e) {
+                        ChatLib.chat("Error writing JSON: " + e);
+                    }
+                }
+            }).start();
+        }
+
+        // Check Import Button Click
+        if (isButtonClicked(mouseX, mouseY, guiX + 500, guiY + 10, 70, 30)) {
+            // Implement the import logic here (e.g., read from file or clipboard)
+            new Thread(function() {
+                var fileChooser = new JFileChooser();
+                var result = fileChooser.showOpenDialog(null);
+                if (result === JFileChooser.APPROVE_OPTION) {
+                    try {
+                        var file = fileChooser.getSelectedFile();
+                        var br = new BufferedReader(new FileReader(file));
+                        
+                        var stringBuilder = new java.lang.StringBuilder();
+                        var line;
+                        while ((line = br.readLine()) != null) {
+                            stringBuilder.append(line);
+                        }
+                        br.close();
+                        
+                        var fileContent = stringBuilder.toString();
+                        var jsonData = JSON.parse(fileContent);
+                        pathConfig = jsonData;
+                    } catch (e) {
+                        ChatLib.chat("Error importing data: " + e.message);
+                    }
+                }
+            }).start();
+        }
+
+        // Check outside of the GUI
+        if (mouseX < guiX || mouseX > guiX + guiWidth || mouseY < guiY || mouseY > guiY + guiHeight) {
+            gui.close();
+        }
     });
 
     // Register Drawing Logic
@@ -152,7 +206,13 @@ export function openPathGui() {
         drawButton(guiX + 10, guiY + 50, 100, 30, "Add Point");
         drawButton(guiX + 120, guiY + 50, 30, 30, "↑");
         drawButton(guiX + 160, guiY + 50, 30, 30, "↓");
-        drawButton(guiX + 470, guiY + 10, 70, 30, "Save");
+        drawButton(guiX + 420, guiY + 10, 70, 30, "Export"); 
+        drawButton(guiX + 500, guiY + 10, 70, 30, "Import");
+    });
+
+    gui.registerClosed(() => {
+        // Save the path configuration when the GUI is closed
+        savePaths(pathConfig);
     });
 
     gui.open();

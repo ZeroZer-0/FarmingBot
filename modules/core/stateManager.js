@@ -2,7 +2,8 @@
 
 import { logInfo, logWarn } from "../core/logger";
 import { stopPathFollowing, stopMovement } from "../path/pathManager";
-import { setCurrentPathType, getBotState, setBotState, getPreviousBotState, setGuiVisible, setReapplyPestRepellent, getCurrentArea } from "../core/globalVaribles";
+import { getHeldItemName } from "../player/playerManager";
+import { setCurrentPathType, getBotState, setBotState, getPreviousBotState, setGuiVisible, setReapplyPestRepellent, getCurrentArea, setInitialTool, getGuiVisible } from "../core/globalVaribles";
 
 /**
  * Starts the bot, initializing path-following and setting the state to "running".
@@ -17,7 +18,12 @@ export function startBot(pathType) {
         logWarn("Cannot start bot outside of the Garden area.");
         return false;
     }
+    // if (!getGuiVisible()) { // Reevaluating the need for GUI visibility check may or may not be implemented in the future.
+    //     logWarn("GUI is not visible. Cannot start bot.");
+    //     return false;
+    // }
     setCurrentPathType(pathType);
+    setInitialTool(ChatLib.removeFormatting(getHeldItemName()));
     setBotState("Running");
     logInfo(`Bot state changed from ${getPreviousBotState()} to running.`);
     return true;

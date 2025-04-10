@@ -59,3 +59,19 @@ export function releaseAllKeys() {
     });
     heldKeys.clear();
 }
+
+/**
+ * Forces the release of all keys, regardless of their current state.
+ */
+export function forceRealseAllKeys() {
+    const allKeys = ["forward", "back", "left", "right"];
+    allKeys.forEach((key) => {
+        const keyBind = Client.getKeyBindFromDescription(`key.${key}`);
+        if (keyBind) {
+            keyBind.setState(false);
+        } else {
+            logError(`Keybind with description 'key.${key}' not found.`);
+        }
+    });
+    heldKeys.clear();
+}

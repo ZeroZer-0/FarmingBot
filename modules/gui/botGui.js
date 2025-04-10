@@ -15,7 +15,7 @@ import {
     getPestCount,
     getCurrentArea,
     getPestRepellentTimer,
-    getReapplyPestRepellent
+    getReapplyPestRepellent,
 } from "../core/globalVaribles";
 import { startBot, stopBot, pauseBot, resumeBot } from "../core/stateManager";
 import { getPlayerPosition, getPlayerFacing } from "../player/playerManager";
@@ -105,12 +105,18 @@ register("chat", (chat) => {
     }
 });
 
-register("renderOverlay", () => {
+
+register("renderOverlay", (event) => {
     // If GUI is hidden, do nothing
     if (!getGuiVisible()) {
         Scoreboard.setShouldRender(true);
         return;
     }
+
+    if (event.getType && (event.getType() === "TITLE" || event.getType() === "SUBTITLE")) {
+        event.cancel();
+    }
+
     Scoreboard.setShouldRender(false);
 
     // Recompute scaling factors each frame
@@ -494,9 +500,9 @@ function drawInventory(x, y) {
 }
 
 function drawLogPanel(x, y, width, height) {
-    const logMessages = getLogMessages();
-    const lineHeight = 12 * (widthScale + heightScale) / 2; // Approx. scaled line height
-    const maxLines = Math.floor((height - 30) / lineHeight);
+    const logMessages = getLogMessages().slice().reverse();
+    const lineHeight = 15 * (Math.sqrt(widthScale * heightScale)/1.2); // Approx. scaled line height
+    const maxLines = Math.floor(((height-15) / lineHeight) / (Math.sqrt(widthScale * heightScale)/1.2))-1;
 
     // Draw panel background
     Renderer.drawRect(Renderer.color(255, 255, 255, 30), x, y, width, height);
@@ -504,9 +510,43 @@ function drawLogPanel(x, y, width, height) {
     // Title
     Renderer.drawString("Log Messages", x + width / 2.5, y + 5, true);
 
-    // Render log messages
-    logMessages.slice(-maxLines).forEach((message, index) => {
-        Renderer.drawString(message, x + 5, y + 35 + index * lineHeight, true);
+    let renderedLines = [];
+    let currentLineCount = 0;
+
+    // Process log messages into lines until maxLines is reached
+    for (let i = 0; i < logMessages.length && currentLineCount < maxLines; i++) {
+        const message = logMessages[i].replace(/&[0-9a-fklmnor]/g, "");
+        const formattedMessage = ChatLib.removeFormatting(message);
+        const timestampRegex = /^\[\d{2}\/\d{2}\/\d{4} - \d{2}:\d{2}:\d{2}\]/;
+        const cleanedMessage = formattedMessage.replace(timestampRegex, "").trim();
+        const maxWidth = width / (Math.sqrt(widthScale * heightScale)/1.2);
+        let words = cleanedMessage.split(" ");
+        let currentLine = "";
+
+        words.forEach((word) => {
+            const testLine = currentLine + word + " ";
+            if (Renderer.getStringWidth(testLine) > maxWidth) {
+                if (currentLineCount < maxLines) {
+                    renderedLines.push(currentLine.trim());
+                    currentLineCount++;
+                }
+                currentLine = word + " ";
+            } else {
+                currentLine = testLine;
+            }
+        });
+
+        if (currentLine.trim().length > 0 && currentLineCount < maxLines) {
+            renderedLines.push(currentLine.trim());
+            currentLineCount++;
+        }
+    }
+
+    // Render the lines
+    renderedLines.forEach((line, index) => {
+        const currentY = ((y + 20)/(Math.sqrt(widthScale * heightScale)/1.2)) + index * lineHeight;
+        Renderer.scale(Math.sqrt(widthScale * heightScale)/1.2);
+        Renderer.drawString(line, (x/(Math.sqrt(widthScale * heightScale)/1.2)) + 5, currentY, true);
     });
 }
 

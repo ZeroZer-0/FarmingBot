@@ -1,10 +1,18 @@
-// main.js - Entry point for the ChatTriggers bot
+// main.js - Entry point for the ChatTriggers bot;
 
 const File = Java.type("java.io.File");
+if (!new File("./config/ChatTriggers/modules/FarmBot/").exists()) {
+    ChatLib.chat(`&c!!!!!FarmBot appears to be miss named in your chat tiggers modules folder. Please rename it to FarmBot and run "/ct load"!!!!!`);
+    throw new Error("Incorrect module name");
+}
+
+
 let folder = new File("./config/FarmBot/");
 if (!folder.exists()) {
     folder.mkdirs();
 }
+
+
 
 import { getBotState, getIsFollowingPath, getCurrentPathType, updatePestRepellent, setReapplyPestRepellent, setCheckFailed, setMinPestCount } from "../core/globalVaribles";
 import { inventoryChecker, resetInventoryChecker } from "../checkers/inventoryChecker";
@@ -17,6 +25,9 @@ import { updatePlayerArea } from "../player/playerManager";
 import { checkPestRepellent } from "./pestRepellent";
 import { openPathGui } from "../gui/pathGui";
 import { toggleBotGui } from "../gui/botGui";
+import { checkForUpdate } from "./autoUpdater";
+
+checkForUpdate(); // Check for updates on module load
 
 let lock1 = false;
 let lock2 = false;
