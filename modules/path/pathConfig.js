@@ -3,9 +3,9 @@
 import { getTestingMode } from "../core/globalVaribles";
 import { logInfo, logError, logDebug } from "../core/logger";
 
-
 let pathsFileLocation = "./config/FarmBot/paths.json";
 
+fixPathConfigFile();
 
 
 /**
@@ -33,6 +33,7 @@ export function loadPaths() {
     }
 }
 
+
 /**
  * Saves the given path configurations to the paths.json file.
  * @param {Object} paths - The path configurations to save.
@@ -49,6 +50,7 @@ export function savePaths(paths) {
         logError(`Failed to save paths.json: ${e.message}`);
     }
 }
+
 
 /**
  * Adds a new point to a specified path.
@@ -71,6 +73,7 @@ export function addPathPoint(pathType, point) {
     logInfo(`Added point to ${pathType}: ${JSON.stringify(point)}`);
 }
 
+
 /**
  * Removes a point from a specified path by index.
  * @param {string} pathType - The type of path ("Primary", "Secondary", "Evacuation").
@@ -91,6 +94,7 @@ export function removePathPoint(pathType, index) {
     logInfo(`Removed point from ${pathType}: ${JSON.stringify(removed[0])}`);
 }
 
+
 /**
  * Retrieves all points of a specified path.
  * @param {string} pathType - The type of path ("Primary", "Secondary", "Evacuation").
@@ -105,6 +109,7 @@ export function getPathPoints(pathType) {
     return paths[pathType];
 }
 
+
 /**
  * Validates the structure of a path point.
  * @param {Object} point - The point to validate.
@@ -116,4 +121,41 @@ function isValidPoint(point) {
 
 export function getPathConfigFile() {
     return pathsFileLocation;
+}
+
+/**
+ * Fixes the path configuration file if it doesn't exist.
+ */
+function fixPathConfigFile() {
+    if (getTestingMode()) {
+        pathsFileLocation = "./config/FarmBot/testing paths.json";
+    } else {
+        pathsFileLocation = "./config/FarmBot/paths.json";
+    }
+    if (!FileLib.exists(pathsFileLocation)) {
+        const defaultPaths = {
+            Primary: [],
+            Secondary: [],
+            Evacuation: []
+        };
+        FileLib.write(pathsFileLocation, JSON.stringify(defaultPaths, null, 4));
+        logInfo("Created default paths.json file.");
+    } else {
+        const fileContent = FileLib.read(pathsFileLocation);
+        let paths = JSON.parse(fileContent);
+        for (let pathType in paths) {
+            if (!Array.isArray(paths[pathType])) {
+                logError(`Invalid path structure for ${pathType}. Expected an array.`);
+                paths[pathType] = [];
+            } else {
+                if (paths[pathType].length !== 0 && paths[pathType][0].hasOwnProperty("forcedKeys")) {
+                    return;
+                }
+                for (let point of paths[pathType]) {
+                    point.forcedKeys = point.forcedKeys || [];
+                }
+            }
+        }
+        FileLib.write(pathsFileLocation, JSON.stringify(paths, null, 4));
+    }
 }

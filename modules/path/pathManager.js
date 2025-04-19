@@ -143,23 +143,43 @@ export function followPathStep() {
  * @param {Object} targetPoint - The target position.
  */
 function moveTowardsPoint(playerPos, targetPoint) {
-    let newDirections = getMovementDirections(calculateMovementDelta(playerPos, targetPoint));
-    directions.forEach((direction) => {
-        if (currentDirection.includes(direction) && !newDirections.includes(direction)) {
-            if (evacuating) {
-            releaseKey(`key.${direction}`);
-            } else {
-                setTimeout(() => {releaseKey(`key.${direction}`);}, 50 + Math.random() * 100);
+    if (getBotState() !== "Running") return;
+    if (targetPoint.forcedKeys.length > 0) {
+        directions.forEach((direction) => {
+            if (currentDirection.includes(direction) && !targetPoint.forcedKeys.includes(direction)) {
+                if (evacuating) {
+                releaseKey(`key.${direction}`);
+                } else {
+                    setTimeout(() => {releaseKey(`key.${direction}`);}, 50 + Math.random() * 100);
+                }
+            } else if (!currentDirection.includes(direction) && targetPoint.forcedKeys.includes(direction)) {
+                if (evacuating) {
+                    pressKey(`key.${direction}`);
+                } else {
+                    setTimeout(() => {pressKey(`key.${direction}`);}, 160 + Math.random() * 100);
+                }
             }
-        } else if (!currentDirection.includes(direction) && newDirections.includes(direction)) {
-            if (evacuating) {
-                pressKey(`key.${direction}`);
-            } else {
-                setTimeout(() => {pressKey(`key.${direction}`);}, 160 + Math.random() * 100);
+        });
+        currentDirection = targetPoint.forcedKeys;
+    } else {
+        let newDirections = getMovementDirections(calculateMovementDelta(playerPos, targetPoint));
+        directions.forEach((direction) => {
+            if (currentDirection.includes(direction) && !newDirections.includes(direction)) {
+                if (evacuating) {
+                releaseKey(`key.${direction}`);
+                } else {
+                    setTimeout(() => {releaseKey(`key.${direction}`);}, 50 + Math.random() * 100);
+                }
+            } else if (!currentDirection.includes(direction) && newDirections.includes(direction)) {
+                if (evacuating) {
+                    pressKey(`key.${direction}`);
+                } else {
+                    setTimeout(() => {pressKey(`key.${direction}`);}, 160 + Math.random() * 100);
+                }
             }
-        }
-    });
-    currentDirection = newDirections;
+        });
+        currentDirection = newDirections;
+    }
 }
 
 /**

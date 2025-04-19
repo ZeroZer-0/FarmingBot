@@ -84,3 +84,4 @@ export function updatePlayerArea() {
         setCurrentArea("undefined");
     }
 }
+

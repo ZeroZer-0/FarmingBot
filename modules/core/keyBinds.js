@@ -326,3 +326,17 @@ export function getKeyNameByKeyBind(keybind) {
 export function getKeyDescriptionByKeyBind(keybind) {
     return getKeyDescriptionByCode(keybind.getKeyCode());
 }
+
+
+/**
+ * Get key from keybind description
+ * @param {string} description - The description of the key.
+ * @returns {KeyBind|null} - The keybind or null if not found.
+ */
+export function getKeyFromKeyBindDescription(description) {
+    const keybind = getKeyBindByDescription(description);
+    if (keybind) {
+        return getKeyNameByCode(keybind.getKeyCode());
+    }
+    return null;
+}

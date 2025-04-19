@@ -411,3 +411,14 @@ export function getInitialTool() {
 export function setInitialTool(tool) {
     initialTool = tool;
 }
+
+
+let aliasFileLocation = `./config/FarmBot/alias.json`;
+
+/**
+ * Gets the alias file location.
+ * @return {string} - The alias file location.
+ */
+export function getAliasFileLocation() {
+    return aliasFileLocation;
+}

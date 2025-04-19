@@ -12,8 +12,6 @@ if (!folder.exists()) {
     folder.mkdirs();
 }
 
-
-
 import { getBotState, getIsFollowingPath, getCurrentPathType, updatePestRepellent, setReapplyPestRepellent, setCheckFailed, setMinPestCount } from "../core/globalVaribles";
 import { inventoryChecker, resetInventoryChecker } from "../checkers/inventoryChecker";
 import { resetYawPitchChecker, yawPitchChecker } from "../checkers/yawPitchChecker";
@@ -26,6 +24,7 @@ import { checkPestRepellent } from "./pestRepellent";
 import { openPathGui } from "../gui/pathGui";
 import { toggleBotGui } from "../gui/botGui";
 import { checkForUpdate } from "./autoUpdater";
+import { pointLess } from "./alias";
 
 checkForUpdate(); // Check for updates on module load
 
@@ -81,11 +80,14 @@ register("command", (minCount) => {
 
 // Help command for ChatTriggers bot
 register("command", () => {
-    logInfo("Available commands:");
-    logInfo("/botgui - Open the bot control GUI");
-    logInfo("/pathgui - Open the path selection GUI");
-    logInfo("/minpestcount [count] - Set the minimum pest count before playing an alarm");
-    logInfo("/bot [start|pause|resume|stop] - Start, pause, resume, or stop the bot manually");
+    ChatLib.chat("Available commands:");
+    ChatLib.chat("/botgui - Open the bot control GUI");
+    ChatLib.chat("/pathgui - Open the path selection GUI");
+    ChatLib.chat("/minpestcount [count] - Set the minimum pest count before playing an alarm");
+    ChatLib.chat("/bot [start|pause|resume|stop] - Start, pause, resume, or stop the bot manually");
+    ChatLib.chat("/makealias [aliasName] [command] - Create an alias for a command (Do not use spaces in the alias name or use / to start command)");
+    ChatLib.chat("/deletealias [aliasName] - Delete an alias");
+    ChatLib.chat("/listaliases - List all aliases");
 }).setName("bothelp")
     .setTabCompletions(["bothelp"]);
 
